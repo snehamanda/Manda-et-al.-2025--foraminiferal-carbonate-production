@@ -1,2 +1,2 @@
 # Manda-et-al.-2025--foraminiferal-carbonate-production
-This github repositoy correponds to the code I have written to evualte car=lcium carbnate porduction potenital ofor LBFs from the EaM
+This GitHub repositoy corresponds to the code I have written to evaluate calcium carbonate production potential for LBFs from the EaM
