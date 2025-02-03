@@ -1,0 +1,5 @@
+﻿sample id,station,sampling month,area,a1,a2,a3,a4,a5
+shmay,sh,May,50,7.333333333,8,12,13.33333333,0
+shsept,sh,September,100,1.25,4.25,12.75,11,0
+shnov,sh,November,50,1,1,0.666666667,3.333333333,0.333333333
+shmar,sk,March,50,16.5,14,23,43,7.5
