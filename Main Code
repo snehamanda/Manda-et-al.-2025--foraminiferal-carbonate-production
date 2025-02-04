@@ -1,0 +1,183 @@
+##loading all required packages
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from datetime import date
+
+##loading the required dataframe (reffered to as X in the manuscript) 
+#This specific example uses the data on A. lobifera absolute abundances per unit area at Shikmona station. 
+# ROWS: The rows correspond to different samplimg season ( 4 timepoints of sampling) and the coloumns (a1, a2, ...upto a5) correspond to abundance data of the different size classes of A. lobifera
+# a1- < x um, a2 - 
+#COLOUMNS:  1, 2, 3, 4 are numeric of character based descriptive coloumns regarding a certain charectersitic of the data set
+
+df = pd.read_csv('/content/shikmona_amphi.csv')
+
+##The next step will move on to defining the constrants or parameteres to run this set of code for A. lobifera - Shikmona carbonate production potenital calculation. 
+
+#calculating time intervals between sampling season - necessary data in carbonate production poetneial calculation at each iteration. 
+
+# dates (time intervals)
+date1 = date(2021, 5, 31)
+date2 = date(2021, 9, 13)
+date3 = date(2021, 11, 23)
+date4 = date(2022, 3, 8)
+date5 = date(2022, 5, 31)
+delta1 = date2 - date1
+delta2 = date3 - date2
+delta3 = date4 - date3
+delta4 = date5 - date4
+print(delta1.days)
+print(delta2.days)
+print(delta3.days)
+print(delta4.days)
+
+
+
+#parameters - param_a1 corresponds to the average weight of a foraminiferal test (in this case (A. lobifera) in the size class a1. 
+
+param_a1 = 67.1626222026303
+param_a2 = 138.867032636556
+param_a3 = 287.124774478014
+param_a4 = 593.66600231759
+param_a5 = 1227.4779247053
+
+## FUNCTIONS REQUIRED FOR THE CODE
+
+# promotion
+
+# what is promotion? The growth of indvidual foaminifera from size class ai to aj, calcualtion of j, input for X (i + 1) m,n
+
+def promotion(x):
+  if x >= 0 and x < 94.2:
+    return 0
+  elif x >= 94.2 and x < 209.1:
+    return 1
+  elif x >=209.1 and x < 367:
+    return 2
+  elif x >= 367 and x < 813:
+    return 3
+  elif x >= 813 and x < 1423:
+    return 4
+  elif x >= 1423 and x < 2200:
+    #print('Promotion to death zone and will continue to grow')
+    return 5
+  else:
+    #print('Promotion to death zone and growth has terminated')
+    return 6
+
+# weights
+
+def weight(initial_weight, rate, time, weight_upper_limit, count):
+    if initial_weight < weight_upper_limit * count:
+      # Calculates final weight at a given growth rate
+      final_weight = initial_weight * (pow((1 + rate / 100), time))
+      if final_weight >= weight_upper_limit * count:
+        final_weight = weight_upper_limit * count
+        #print("Foraminifera's weight upper limit reached. Final weight of foraminifera in category x at time t1 is", final_weight)
+      #else:
+        #print("Final weight of foraminifera in category x at time t1 is", final_weight)
+
+    else:
+      final_weight = weight_upper_limit * count
+      #print("Foraminifera's weight upper limit reached.")
+      #print("Final weight of foraminifera in category x at time t1 is", final_weight)
+
+    return final_weight
+
+# carbonate production - this is the increment of shell growth from X i (m,n) to X (i + 1) m,n
+
+def carbprod(initial_weight, rate, time, weight_upper_limit, count):
+    if initial_weight < weight_upper_limit * count:
+      # Calculates final weight at a given growth rate
+      final_weight = initial_weight * (pow((1 + rate / 100), time))
+      prod = final_weight - initial_weight
+      if final_weight >= weight_upper_limit * count:
+        final_weight = weight_upper_limit * count
+        prod = final_weight - initial_weight
+
+    else:
+      final_weight = weight_upper_limit * count
+      prod = final_weight - initial_weight
+    return prod
+
+# TIDYING UP THE INITIAL DATA SUCH THAT THERE ARE NO DESCRIPTIVES AND ONLY THE ABSOLUTE ABUNDANCES TO WORK WITH AND INPUT FOR THE CODE/MODEL
+
+df_counts = df[['a1','a2','a3','a4','a5']]
+df_counts
+[rows, cols] = df_counts.shape
+print(df_counts.shape)
+
+print(df_counts)
+
+# defining dictionaries and arrays before inputting them into the iteration/ algorithm
+param_list = [param_a1, param_a2, param_a3, param_a4, param_a5]
+growth_rate = 1.5
+time = [106, 71, 106, 84]
+foram_mapping_may_sept, foram_mapping_sept_nov, foram_mapping_nov_mar, foram_mapping_mar_may = {}, {}, {}, {} #these are dictionaries
+foram_mapping_0, foram_mapping_1, foram_mapping_2, foram_mapping_3 = {}, {}, {}, {}
+
+# This conditional loop will generate a m x n matrix that corresponds to xxxxx
+for i in range(rows):
+  if i ==0:
+    for j in range(cols):
+      if df_counts.iloc[i,j] > 0:
+          #This is for a3 may - 0 foraminifera calculation
+          calc_weight = weight(df_counts.iloc[i,j]*param_list[j],growth_rate,time[0],2200,df_counts.iloc[i,j])
+          carb_prod = carbprod(df_counts.iloc[i,j]*param_list[j],growth_rate,time[0],2200,df_counts.iloc[i,j])
+          average_weight = calc_weight/df_counts.iloc[i,j]
+          evolve_stage = promotion(average_weight)
+          globals()["foram_mapping_" + str(i)].update({j:[df_counts.iloc[i,j], evolve_stage, average_weight, carb_prod]}) #dictionary format: dict = {foram_count, evolve_stage, average_weight_per_foram}
+    print(globals()["foram_mapping_" + str(i)])
+
+
+  if i > 0:
+    for j in range(cols):
+
+          for k in globals()["foram_mapping_" + str(i-1)].keys():
+            if globals()["foram_mapping_" + str(i-1)].get(k)[1] == j:
+              if df_counts.iloc[i,j]- globals()["foram_mapping_" + str(i-1)].get(k)[0] > 0:
+                foram_new = (df_counts.iloc[i,j]-globals()["foram_mapping_" + str(i-1)].get(k)[0]) # newly added foram = forams now - promoted forams
+                foram_new_weight = weight(foram_new*param_list[j],growth_rate,time[1],2200,foram_new) #change param
+                foram_old_weight = weight(globals()["foram_mapping_" + str(i-1)].get(k)[0]*param_list[j],growth_rate,time[1],2200,globals()["foram_mapping_" + str(i-1)].get(k)[0])
+                foram_new_weight_avg = foram_new_weight/foram_new
+                foram_old_weight_avg = foram_old_weight/globals()["foram_mapping_" + str(i-1)].get(k)[0]
+                evolve_stage_foram_new_a4_sept = promotion(foram_new_weight_avg)
+                evolve_stage_foram_old_a4_sept = promotion(foram_old_weight_avg)
+                carb_prod_new = carbprod(foram_new*param_list[j],growth_rate,time[1],2200,foram_new)
+                carb_prod_old = carbprod(globals()["foram_mapping_" + str(i-1)].get(k)[0]*["foram_mapping_" + str(i-1).get(k)[2]], growth_rate,time[i],2200,globals()["foram_mapping_" + str(i-1)].get(k)[0])
+                if evolve_stage_foram_new_a4_sept == evolve_stage_foram_old_a4_sept:
+                  globals()["foram_mapping_" + str(i)].update({j:[df_counts.iloc[i,j], evolve_stage_foram_old_a4_sept, foram_new_weight_avg, carb_prod_new]}) # assuming new avg weight getting carry forward
+                else:
+                  globals()["foram_mapping_" + str(i)].update({j:[df_counts.iloc[i,j], [evolve_stage_foram_old_a4_sept, evolve_stage_foram_new_a4_sept], [foram_old_weight_avg, foram_new_weight_avg]]})
+
+
+              else:
+                foram_old_count = df_counts.iloc[i,j]
+                foram_old_weight = weight(foram_old_count*globals()["foram_mapping_" + str(i-1)].get(k)[2],growth_rate,time[1],2200,df_counts.iloc[i,j])
+                carb_prod = carbprod(foram_old_count*globals()["foram_mapping_" + str(i-1)].get(k)[2],growth_rate,time[1],2200,df_counts.iloc[i,j])
+                foram_old_weight_avg = foram_old_weight/foram_old_count
+                # print(foram_old_count)
+                # print(foram_old_weight_avg)
+                evolve_stage_foram_old_a4_sept = promotion(foram_old_weight)
+                globals()["foram_mapping_" + str(i)].update({j:[df_counts.iloc[i,j], evolve_stage_foram_old_a4_sept, foram_old_weight_avg, carb_prod]})
+
+            elif globals()["foram_mapping_" + str(i-1)].get(k)[1] == 5:
+              calc_weight = weight(globals()["foram_mapping_" + str(i-1)].get(k)[0]*globals()["foram_mapping_" + str(i-1)].get(k)[2],growth_rate,time[i],2200,globals()["foram_mapping_" + str(i-1)].get(k)[0])
+              average_weight = calc_weight/globals()["foram_mapping_" + str(i-1)].get(k)[0]
+              evolve_stage = promotion(average_weight)
+              if evolve_stage == 5:
+                globals()["foram_mapping_" + str(i)].update({evolve_stage:[globals()["foram_mapping_" + str(i-1)].get(k)[0], evolve_stage, average_weight]})
+
+
+
+            else:
+              if df_counts.iloc[i,j] > 0:
+                #This is for a3 may - 0 foraminifera calculation
+                calc_weight = weight(df_counts.iloc[i,j]*param_list[j],growth_rate,time[1],2200,df_counts.iloc[i,j])
+                average_weight = calc_weight/df_counts.iloc[i,j]
+                evolve_stage = promotion(average_weight)
+                globals()["foram_mapping_" + str(i)].update({j:[df_counts.iloc[i,j], evolve_stage, average_weight]}) #dictionary format: dict = {foram_count, evolve_stage, average_weight_per_foram}
+
+
+    print(globals()["foram_mapping_" + str(i)])
