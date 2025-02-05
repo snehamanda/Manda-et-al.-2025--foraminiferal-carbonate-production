@@ -1,4 +1,6 @@
 # This file is the code containing step-by-step instructions on using the model to estimate Calcium Carbonate production potential (C<sub>prod</sub>) of _Textularia agglutinans_ from Akhziv station (refer Fig X fromt he manuscript)
+# Remember that for _T. agglutinans_ the final C<sub>prod</sub> value obtained must be adjusted 20%, keeping in the mind the unique calcareous+ agglutinated shell it has
+
 ## This code is run on Jupyter notebook, python
 
 ## step 1 - loading the required packages
