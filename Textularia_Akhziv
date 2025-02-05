@@ -1,7 +1,6 @@
 # This file is the code containing step-by-step instructions on using the model to estimate Calcium Carbonate production potential (C<sub>prod</sub>) of _Textularia agglutinans_ from Akhziv station (refer Fig X fromt he manuscript)
-# Remember that for _T. agglutinans_ the final C<sub>prod</sub> value obtained must be adjusted 20%, keeping in the mind the unique calcareous+ agglutinated shell it has
-
-## This code is run on Jupyter notebook, python
+# Remember that for _T. agglutinans_ the final C<sub>prod</sub> value obtained must be adjusted 20%, accounting that the whole test is not calcareous
+# This code is run on Jupyter notebook, python
 
 ## step 1 - loading the required packages
 import pandas as pd
@@ -24,10 +23,10 @@ timedelta1 = date2 - date1
 timedelta2 = date3 - date2
 timedelta3 = date4 - date3
 timedelta4 = date5 - date4
-print(delta1.days)
-print(delta2.days)
-print(delta3.days)
-print(delta4.days)
+print(timedelta1.days)
+print(timedelta2.days)
+print(timedelta3.days)
+print(timedelta4.days)
 
 ## step 3 - Calculating parameters for Textularia
 ### Now, we will define some parameters and functions relevant to _T. agglutinans_, It is the data from mass-diameter relationships
