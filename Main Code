@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from datetime import date
 ```
 ```
-#calculating time intervals between sampling seasons - necessary data in carbonate production potential calculation at each iteration. 
+#calculating time intervals between sampling seasons - necessary data in carbonate production potential calculation at each iteration of the model
 
 # dates (time intervals)
 date1 = date(2021, 5, 31)
