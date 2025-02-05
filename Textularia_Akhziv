@@ -1,5 +1,5 @@
 # This file is the code containing step-by-step instructions on using the model to estimate Calcium Carbonate production potential (C<sub>prod</sub>) of _Textularia agglutinans_ from Akhziv station (refer Fig X fromt he manuscript)
-## This code is run on python
+## This code is run on Jupyter notebook, python
 
 ## step 1 - loading the required packages
 import pandas as pd
@@ -69,7 +69,7 @@ def param_calc(size, exponent,constant):
 
 param_calc(2500, 1.7616, 0.0012)  ### example
 
-#Constants/parameters for Textularia derived from _df_param_ array
+### Constants/parameters for Textularia derived from _df_param_ array
 
 param_a1 =  20.109088
 param_a2 =  115.686524
@@ -81,25 +81,29 @@ param_a7 =  699.681332
 param_a8 =  964.685987
 
 ## step 4
-## Now that all the parameters and constants are defined for the 
 
-#loading the required dataframe
+### loading the required dataframe (reffered to as X in the manuscript Figure 3) 
+### This specific example uses the data on _T. agglutinans_ absolute abundances per unit area at Akhziv station. 
+### ROWS: The rows correspond to different sampling season  and the COLOUMNS (t1, t2, ...upto t8) correspond to abundance data of the different size classes of _T. agglutinans_
+### refer to array _ df_param _ for more information on t1, t2... etc
+
 df = pd.read_csv('/content/akhziv_textularia.csv')
 
 print(df)
 
-df_counts = df[['t1','t2','t3','t4','t5', 't6', 't7', 't8']]
+df_counts = df[['t1','t2','t3','t4','t5', 't6', 't7', 't8']]      ### formatting the data with only numerocal nformation i.e. population dynamics data ( refer to ection 2.2)
 df_counts
 [rows, cols] = df_counts.shape
 print(df_counts.shape)
 
 print(df_counts)
 
-## DEFINITIONS
+## step 5 - DEFINITIONS
 
-# promotion
+### _promotion_ : a definition to evaluate the size class of foraminifera in the next iteration. This is required to construct estimate Ti (m,n) from Xi (m,n) and also evauakte "corrected population structure" at time "i+1" it is required 
 
-# Textularia reach death zone when they attain the size of 2500 micrometers
+### Textularia reach the death zone when they attain the size of 2500 micrometers
+
 def promotion(x):
   if x >= 0 and x <  20.109088:
     return 0
@@ -124,7 +128,7 @@ def promotion(x):
     #print('Promotion to death zone and growth has terminated')
     return 9
 
-# weights
+### weights
 
 def weight(initial_weight, rate, time, weight_upper_limit, count):
     if initial_weight < weight_upper_limit * count:
@@ -143,7 +147,7 @@ def weight(initial_weight, rate, time, weight_upper_limit, count):
 
     return final_weight
 
-# carbonate production
+### carbonate production (C<sub>prod</sub>)
 
 def carbprod(initial_weight, rate, time, weight_upper_limit, count):
     if initial_weight < weight_upper_limit * count:
@@ -159,7 +163,11 @@ def carbprod(initial_weight, rate, time, weight_upper_limit, count):
       prod = final_weight - initial_weight
     return prod
 
-param_list = [param_a1, param_a2, param_a3, param_a4, param_a5, param_a6, param_a7, param_a8]
+## step 6 - DEFINING DICTIONARIES AND ARRAYS
+### These will be the inputs for the conditional code whose output will be the dictionaries "foram_mapping_0, foram_mapping_1, foram_mapping_2, foram_mapping_3".
+### The last entry of each of the dictionaries will correspond to "carbprod" calculated for each season in each iteration. The sum of all "carbprod" will be the estimated C<sub>prod</sub> for Akhziv
+
+param_list = [param_t1, param_t2, param_t3, param_t4, param_t5, param_t6, param_t7, param_t8]
 growth_rate = 1.5
 time = [106, 71, 106, 84]
 foram_mapping_may_sept, foram_mapping_sept_nov, foram_mapping_nov_mar, foram_mapping_mar_may = {}, {}, {}, {} #these are dictionaries
@@ -259,12 +267,3 @@ for i in range(rows):
 
     print(globals()["foram_mapping_" + str(i)])
 
-start_Seed = df_counts*param_list
-
-start_Seed
-
-start_Seed.sum()
-
-#print(start_Seed.__class__)
-
-start_Seed.sum().sum()*0.000001*0.2
