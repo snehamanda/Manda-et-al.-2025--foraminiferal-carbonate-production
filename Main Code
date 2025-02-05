@@ -29,12 +29,16 @@ print(delta4.days)
 # the units of size must be in micrometers
 
 # initialize list of lists
-data = [['a1', 500, 250], ['a2', 750, 675], ['a3', 1000, 875], ['a4', 1250, 1175], ['a5', 1500, 1375] , ['a6', 1750, 1675], ['a7', 2000, 1875], ['a8', 2500, 2250]]
+sizeclass_a = [['a1', 500, 250], ['a2', 750,675], ['a3', 1000, 875], ['a4', 1500, 1250], ['a5', 2000, 1750]]
+
+#This is for Textularia agglutians, use it wjen you run the code for textularia.
+
+#sizeclass_t = [['t1', 500, 250], ['a2', 750, 675], ['a3', 1000, 875], ['a4', 1250, 1175], ['a5', 1500, 1375] , ['a6', 1750, 1675], ['a7', 2000, 1875], ['a8', 2500, 2250]]
 ```
 
 ```
 # Create the pandas DataFrame
-df_param = pd.DataFrame(data, columns=['size class', 'Upper Limit', 'midpoint size'])
+df_param = pd.DataFrame(sizeclass, columns=['size class', 'Upper Limit', 'midpoint size'])
 
 # print dataframe.
 print(df_param)
