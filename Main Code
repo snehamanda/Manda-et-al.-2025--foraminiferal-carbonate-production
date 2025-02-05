@@ -1,21 +1,13 @@
+```
 ##loading all required packages
 
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from datetime import date
-
-##loading the required dataframe (reffered to as X in the manuscript) 
-#This specific example uses the data on A. lobifera absolute abundances per unit area at Shikmona station. 
-# ROWS: The rows correspond to different samplimg season ( 4 timepoints of sampling) and the coloumns (a1, a2, ...upto a5) correspond to abundance data of the different size classes of A. lobifera
-# a1- < x um, a2 - 
-#COLOUMNS:  1, 2, 3, 4 are numeric of character based descriptive coloumns regarding a certain charectersitic of the data set
-
-df = pd.read_csv('/content/shikmona_amphi.csv')
-
-##The next step will move on to defining the constrants or parameteres to run this set of code for A. lobifera - Shikmona carbonate production potenital calculation. 
-
-#calculating time intervals between sampling season - necessary data in carbonate production poetneial calculation at each iteration. 
+```
+```
+#calculating time intervals between sampling seasons - necessary data in carbonate production potential calculation at each iteration. 
 
 # dates (time intervals)
 date1 = date(2021, 5, 31)
@@ -31,10 +23,70 @@ print(delta1.days)
 print(delta2.days)
 print(delta3.days)
 print(delta4.days)
+```
+```
+#Calculating parameters for A. lobifera
+# the units of size must be in micrometers
+
+# initialize list of lists
+data = [['a1', 500, 250], ['a2', 750, 675], ['a3', 1000, 875], ['a4', 1250, 1175], ['a5', 1500, 1375] , ['a6', 1750, 1675], ['a7', 2000, 1875], ['a8', 2500, 2250]]
+```
+
+```
+# Create the pandas DataFrame
+df_param = pd.DataFrame(data, columns=['size class', 'Upper Limit', 'midpoint size'])
+
+# print dataframe.
+print(df_param)
+
+[paramrow, paramcol] = df_param.shape
+
+paramrow
+```
+
+```
+#now I want to run a for loop to calculate sizeweight for every entry in "Upper limit" and "midpoint size" coloumns in df_param
+
+# Loop through columns using a for loop
+#for i in range(paramrow):
+#    print(col)
+
+# create a new columns
+df_param['Average weight'] = sizemass (df_param['midpoint size']) # average weights of a size class
+
+df_param['param'] = sizemass (df_param['Upper Limit']) # definitions of promotions
+
+# Print the DataFrame after addition
+# of new column
+print(df_param)
+```
+
+```
+# mass-diamter equation
+def param_calc(size, exponent,constant):
+     param = constant * (pow(size, exponent))
+      # Calculates the paramet ai of a given sze of textularia
+     print(param)
+
+param_calc(2500, 1.7616, 0.0012)
+```
+
+
+##loading the required dataframe (reffered to as X in the manuscript) 
+#This specific example uses the data on A. lobifera absolute abundances per unit area at Shikmona station. 
+# ROWS: The rows correspond to different samplimg season ( 4 timepoints of sampling) and the coloumns (a1, a2, ...upto a5) correspond to abundance data of the different size classes of A. lobifera
+# a1- < x um, a2 - 
+#COLOUMNS:  1, 2, 3, 4 are numeric of character based descriptive coloumns regarding a certain charectersitic of the data set
+
+df = pd.read_csv('/content/shikmona_amphi.csv')
+
+##The next step will move on to defining the constants or parameters to run this set of code for A. lobifera - Shikmona carbonate production potential calculation. 
 
 
 
-#parameters - param_a1 corresponds to the average weight of a foraminiferal test (in this case (A. lobifera) in the size class a1. 
+#Constants
+#parameters for A. lobifera
+#parameters - param_a1 corresponds to the average weight of a foraminiferal test (in this case (A. lobifera) in the size class a1, and so on
 
 param_a1 = 67.1626222026303
 param_a2 = 138.867032636556
@@ -111,73 +163,119 @@ print(df_counts.shape)
 print(df_counts)
 
 # defining dictionaries and arrays before inputting them into the iteration/ algorithm
-param_list = [param_a1, param_a2, param_a3, param_a4, param_a5]
+param_list = [param_a1, param_a2, param_a3, param_a4, param_a5, param_a6, param_a7, param_a8]
 growth_rate = 1.5
 time = [106, 71, 106, 84]
 foram_mapping_may_sept, foram_mapping_sept_nov, foram_mapping_nov_mar, foram_mapping_mar_may = {}, {}, {}, {} #these are dictionaries
 foram_mapping_0, foram_mapping_1, foram_mapping_2, foram_mapping_3 = {}, {}, {}, {}
 
 # This conditional loop will generate a m x n matrix that corresponds to xxxxx
+
 for i in range(rows):
   if i ==0:
     for j in range(cols):
       if df_counts.iloc[i,j] > 0:
-          #This is for a3 may - 0 foraminifera calculation
-          calc_weight = weight(df_counts.iloc[i,j]*param_list[j],growth_rate,time[0],2200,df_counts.iloc[i,j])
-          carb_prod = carbprod(df_counts.iloc[i,j]*param_list[j],growth_rate,time[0],2200,df_counts.iloc[i,j])
+          calc_weight = weight(df_counts.iloc[i,j]*param_list[j],growth_rate,time[0],3308.6962816378864,df_counts.iloc[i,j])
           average_weight = calc_weight/df_counts.iloc[i,j]
           evolve_stage = promotion(average_weight)
-          globals()["foram_mapping_" + str(i)].update({j:[df_counts.iloc[i,j], evolve_stage, average_weight, carb_prod]}) #dictionary format: dict = {foram_count, evolve_stage, average_weight_per_foram}
+          prod_carb = carbprod(df_counts.iloc[i,j]*param_list[j],growth_rate,time[0],2200,df_counts.iloc[i,j])
+          globals()["foram_mapping_" + str(i)].update({j:[df_counts.iloc[i,j], evolve_stage, average_weight, prod_carb]}) #dictionary format: dict = {foram_count, evolve_stage, average_weight_per_foram}
+      else:
+        globals()["foram_mapping_" + str(i)].update({j:[0, -1, 0, 0]})
+
     print(globals()["foram_mapping_" + str(i)])
 
 
   if i > 0:
+    print('<<<<<<<< ',i,' >>>>>>>>')
+    #for k in globals()["foram_mapping_" + str(i-1)].keys():
     for j in range(cols):
-
           for k in globals()["foram_mapping_" + str(i-1)].keys():
+          #for j in range(cols):
+            #print('i',i, 'key', k, 'promotion', globals()["foram_mapping_" + str(i-1)].get(k)[1], 'col', j)
+            #print(globals()["foram_mapping_" + str(i-1)].get(k)[1], j)
             if globals()["foram_mapping_" + str(i-1)].get(k)[1] == j:
-              if df_counts.iloc[i,j]- globals()["foram_mapping_" + str(i-1)].get(k)[0] > 0:
-                foram_new = (df_counts.iloc[i,j]-globals()["foram_mapping_" + str(i-1)].get(k)[0]) # newly added foram = forams now - promoted forams
-                foram_new_weight = weight(foram_new*param_list[j],growth_rate,time[1],2200,foram_new) #change param
-                foram_old_weight = weight(globals()["foram_mapping_" + str(i-1)].get(k)[0]*param_list[j],growth_rate,time[1],2200,globals()["foram_mapping_" + str(i-1)].get(k)[0])
-                foram_new_weight_avg = foram_new_weight/foram_new
-                foram_old_weight_avg = foram_old_weight/globals()["foram_mapping_" + str(i-1)].get(k)[0]
-                evolve_stage_foram_new_a4_sept = promotion(foram_new_weight_avg)
-                evolve_stage_foram_old_a4_sept = promotion(foram_old_weight_avg)
-                carb_prod_new = carbprod(foram_new*param_list[j],growth_rate,time[1],2200,foram_new)
-                carb_prod_old = carbprod(globals()["foram_mapping_" + str(i-1)].get(k)[0]*["foram_mapping_" + str(i-1).get(k)[2]], growth_rate,time[i],2200,globals()["foram_mapping_" + str(i-1)].get(k)[0])
-                if evolve_stage_foram_new_a4_sept == evolve_stage_foram_old_a4_sept:
-                  globals()["foram_mapping_" + str(i)].update({j:[df_counts.iloc[i,j], evolve_stage_foram_old_a4_sept, foram_new_weight_avg, carb_prod_new]}) # assuming new avg weight getting carry forward
+
+                if df_counts.iloc[i,j] - globals()["foram_mapping_" + str(i-1)].get(k)[0] > 0:
+                  print('condi1 - ',df_counts.iloc[i,j])
+                  foram_new = (df_counts.iloc[i,j]-globals()["foram_mapping_" + str(i-1)].get(k)[0]) # newly added foram = forams now - promoted forams
+                  foram_new_weight = weight(foram_new*param_list[j],growth_rate,time[1],2200,foram_new) #change param
+                  foram_old_weight = weight(globals()["foram_mapping_" + str(i-1)].get(k)[0]*param_list[j],growth_rate,time[i],3308.6962816378864,globals()["foram_mapping_" + str(i-1)].get(k)[0])
+                  foram_new_weight_avg = foram_new_weight/foram_new
+                  foram_old_weight_avg = foram_old_weight/globals()["foram_mapping_" + str(i-1)].get(k)[0]
+                  evolve_stage_foram_new_a4_sept = promotion(foram_new_weight_avg)
+                  evolve_stage_foram_old_a4_sept = promotion(foram_old_weight_avg)
+                  prod_carb_new = carbprod(foram_new*param_list[j],growth_rate,time[1],2200,foram_new)
+                  prod_carb_old = carbprod(globals()["foram_mapping_" + str(i-1)].get(k)[0]*param_list[j],growth_rate,time[i],2200,globals()["foram_mapping_" + str(i-1)].get(k)[0])
+                  if evolve_stage_foram_new_a4_sept == evolve_stage_foram_old_a4_sept:
+                    globals()["foram_mapping_" + str(i)].update({j:[df_counts.iloc[i,j], evolve_stage_foram_old_a4_sept, foram_new_weight_avg, prod_carb_new + prod_carb_old]}) # assuming new avg weight getting carry forward
+                  else:
+                    globals()["foram_mapping_" + str(i)].update({j:[df_counts.iloc[i,j], min([evolve_stage_foram_old_a4_sept, evolve_stage_foram_new_a4_sept]), min([foram_old_weight_avg, foram_new_weight_avg]) ,prod_carb_new + prod_carb_old ]})
+
+                elif df_counts.iloc[i,j]- globals()["foram_mapping_" + str(i-1)].get(k)[0] < 0:
+                  #print('condi0 - ',df_counts.iloc[i,j],j)
+                  if df_counts.iloc[i,j] > 0:
+                    #print('condi2 - ',df_counts.iloc[i,j])
+                    foram_new = df_counts.iloc[i,j] # newly added foram = forams now - promoted forams
+                    foram_growth = weight(df_counts.iloc[i,j]*globals()["foram_mapping_" + str(i-1)].get(k)[2],growth_rate,time[i],3308.6962816378864,df_counts.iloc[i,j])
+                    foram_growth_avg = foram_growth/df_counts.iloc[i,j]
+                    evolve_stage_foram_old_a4_sept = promotion(foram_growth_avg)
+                    prod_carb = carbprod(df_counts.iloc[i,j]*globals()["foram_mapping_" + str(i-1)].get(k)[2],growth_rate,time[i],3308.6962816378864,df_counts.iloc[i,j])
+
+                    globals()["foram_mapping_" + str(i)].update({j:[df_counts.iloc[i,j], evolve_stage_foram_old_a4_sept, foram_growth_avg, prod_carb]}) # assuming new avg weight getting carry forward
+                    #print('debug1 ',{j:[df_counts.iloc[i,j], evolve_stage_foram_old_a4_sept, foram_growth_avg]})
+                    #print(print(globals()["foram_mapping_" + str(i)]))
+
+
+
+
                 else:
-                  globals()["foram_mapping_" + str(i)].update({j:[df_counts.iloc[i,j], [evolve_stage_foram_old_a4_sept, evolve_stage_foram_new_a4_sept], [foram_old_weight_avg, foram_new_weight_avg]]})
+                  foram_old_count = df_counts.iloc[i,j]
+                  foram_old_weight = weight(foram_old_count*globals()["foram_mapping_" + str(i-1)].get(k)[2],growth_rate,time[i],3308.6962816378864,df_counts.iloc[i,j])
+                  foram_old_weight_avg = foram_old_weight/foram_old_count
+                  # print(foram_old_count)
+                  # print(foram_old_weight_avg)
+                  evolve_stage_foram_old_a4_sept = promotion(foram_old_weight)
+                  prod_carb = carbprod(foram_old_count*globals()["foram_mapping_" + str(i-1)].get(k)[2],growth_rate,time[i],3308.6962816378864,df_counts.iloc[i,j])
+                  globals()["foram_mapping_" + str(i)].update({j:[df_counts.iloc[i,j], evolve_stage_foram_old_a4_sept, foram_old_weight_avg, prod_carb]})
 
-
-              else:
-                foram_old_count = df_counts.iloc[i,j]
-                foram_old_weight = weight(foram_old_count*globals()["foram_mapping_" + str(i-1)].get(k)[2],growth_rate,time[1],2200,df_counts.iloc[i,j])
-                carb_prod = carbprod(foram_old_count*globals()["foram_mapping_" + str(i-1)].get(k)[2],growth_rate,time[1],2200,df_counts.iloc[i,j])
-                foram_old_weight_avg = foram_old_weight/foram_old_count
-                # print(foram_old_count)
-                # print(foram_old_weight_avg)
-                evolve_stage_foram_old_a4_sept = promotion(foram_old_weight)
-                globals()["foram_mapping_" + str(i)].update({j:[df_counts.iloc[i,j], evolve_stage_foram_old_a4_sept, foram_old_weight_avg, carb_prod]})
 
             elif globals()["foram_mapping_" + str(i-1)].get(k)[1] == 5:
-              calc_weight = weight(globals()["foram_mapping_" + str(i-1)].get(k)[0]*globals()["foram_mapping_" + str(i-1)].get(k)[2],growth_rate,time[i],2200,globals()["foram_mapping_" + str(i-1)].get(k)[0])
+              calc_weight = weight(globals()["foram_mapping_" + str(i-1)].get(k)[0]*globals()["foram_mapping_" + str(i-1)].get(k)[2],growth_rate,time[i],3308.6962816378864,globals()["foram_mapping_" + str(i-1)].get(k)[0])
               average_weight = calc_weight/globals()["foram_mapping_" + str(i-1)].get(k)[0]
               evolve_stage = promotion(average_weight)
+              prod_carb = carbprod(globals()["foram_mapping_" + str(i-1)].get(k)[0]*globals()["foram_mapping_" + str(i-1)].get(k)[2],growth_rate,time[i],3308.6962816378864,globals()["foram_mapping_" + str(i-1)].get(k)[0])
               if evolve_stage == 5:
-                globals()["foram_mapping_" + str(i)].update({evolve_stage:[globals()["foram_mapping_" + str(i-1)].get(k)[0], evolve_stage, average_weight]})
+                globals()["foram_mapping_" + str(i)].update({evolve_stage:[globals()["foram_mapping_" + str(i-1)].get(k)[0], evolve_stage, average_weight, prod_carb]})
+              # else:
+              #   globals()["foram_mapping_" + str(i)].update({evolve_stage:[globals()["foram_mapping_" + str(i-1)].get(k)[0], evolve_stage, average_weight]})
+
 
 
 
             else:
-              if df_counts.iloc[i,j] > 0:
-                #This is for a3 may - 0 foraminifera calculation
-                calc_weight = weight(df_counts.iloc[i,j]*param_list[j],growth_rate,time[1],2200,df_counts.iloc[i,j])
-                average_weight = calc_weight/df_counts.iloc[i,j]
-                evolve_stage = promotion(average_weight)
-                globals()["foram_mapping_" + str(i)].update({j:[df_counts.iloc[i,j], evolve_stage, average_weight]}) #dictionary format: dict = {foram_count, evolve_stage, average_weight_per_foram}
+                  if df_counts.iloc[i,j] > 0 and j not in globals()["foram_mapping_" + str(i)].keys():
+                    #print('condi else -', df_counts.iloc[i,j],' ', j )
+                    #This is for a3 may - 0 foraminifera calculation
+                    calc_weight = weight(df_counts.iloc[i,j]*param_list[j],growth_rate,time[i],3308.6962816378864,df_counts.iloc[i,j])
+                    average_weight = calc_weight/df_counts.iloc[i,j]
+                    evolve_stage = promotion(average_weight)
+                    prod_carb = carbprod(df_counts.iloc[i,j]*param_list[j],growth_rate,time[i],3308.6962816378864,df_counts.iloc[i,j])
+                    globals()["foram_mapping_" + str(i)].update({j:[df_counts.iloc[i,j], evolve_stage, average_weight, prod_carb]}) #dictionary format: dict = {foram_count, evolve_stage, average_weight_per_foram}
+                    #print('debug2 ',{j:[df_counts.iloc[i,j], evolve_stage, average_weight]})
 
 
     print(globals()["foram_mapping_" + str(i)])
+
+
+#summing up incremental additions to carbonate shell mass to get the carbonate production rate of A. lonicera at Shiimona over one year. 
+
+start_Seed = df_counts*param_list
+
+start_Seed
+
+start_Seed.sum()
+
+#print(start_Seed.__class__)
+
+start_Seed.sum().sum()*0.000001*0.2
