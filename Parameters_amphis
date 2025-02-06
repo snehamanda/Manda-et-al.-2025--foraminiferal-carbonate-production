@@ -38,7 +38,7 @@ def param_calc(size, exponent,constant):
       # Calculates the parameter t_i_ of a given size of _A. lobifera_
      print(param)
 
-### Constants/parameters for Textularia derived from _df_param_ array
+### Constants/parameters for _A. lobifera_ derived from _df_param_ array
 
 param_a1 =  20.109088
 param_a2 =  115.686524
