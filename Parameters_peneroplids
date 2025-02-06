@@ -1,0 +1,71 @@
+# This file contains all constants and parameters required to run the model for estimating C<sub>prod</sub> for _Peneroplis_
+
+## step 3 - Calculating parameters for _Peneroplis_
+### Now, we will define some parameters and functions relevant to _Peneroplis_, It is the data from mass-diameter relationships
+
+### _sizemass_ : a function to calculate the weight of a foram test with maximum spiral diameter (micrometers) as the input 
+def sizemass(size):
+      weight = 0.0007 * (pow(size, 1.6944))      ### the input for size must be in micrometers
+      return weight
+
+### _weight_sizeclass_ : a function to calculate the average weight of each foram test in a given size category representing their ontogenetic stages (refer to 2.2 of the manuscript)
+def weight_sizeclass(upperlimit, lowerlimit):
+      weight = [sizemass(upperlimit) + sizemass(lowerlimit)] /2            ### the input for size must be in micrometers
+      return weight_sizeclass
+
+### calculating the average and maximum (condition for promotion to the next stage) weights of foram text for each size category
+
+data = [['a1', 500, 250], ['a2', 750, 675], ['a3', 1000, 875], ['a4', 1500, 1250], ['a5', 2000, 1750]]     #### initialize list of lists
+
+df_param = pd.DataFrame(data, columns=['size class', 'Upper Limit', 'midpoint size'])      #### Create the pandas DataFrame
+
+print(df_param)      #### print dataframe.
+
+[paramrow, paramcol] = df_param.shape
+
+paramrow
+
+df_param['Average weight'] = sizemass (df_param['midpoint size']) ### create new columns with average weights of a size class
+
+df_param['param'] = sizemass (df_param['Upper Limit']) # definitions of promotions
+
+print(df_param)
+
+### mass-diameter relationship (figure 2, Table 1)
+
+def param_calc(size, exponent,constant):
+     param = constant * (pow(size, exponent))
+      # Calculates the parameter t_i_ of a given size of _A. lobifera_
+     print(param)
+
+### Constants/parameters for _Peneroplis_ derived from _df_param_ array
+
+param_a1 =  26.195869
+param_a2 =  52.071711
+param_a3 =  84.780903
+param_a4 =  168.526061
+param_a5 =  274.386831
+
+## step 5 - DEFINITIONS
+
+### _promotion_ : a definition to evaluate the size class of foraminifera in the next iteration. This is required to construct estimate Ti (m,n) from Xi (m,n) and also evauakte "corrected population structure" at time "i+1" it is required 
+
+### _Peneroplis_ reach the death zone when they attain the size of 2000 micrometers
+
+def promotion(x):
+  if x >= 0 and x <  26.195869:
+    return 0
+  elif x >=  26.195869 and x < 52.071711:
+    return 1
+  elif x >= 52.071711 and x < 84.780903:
+    return 2
+  elif x >= 84.780903 and x < 168.526061:
+    return 3
+  elif x >= 168.526061 and x < 274.386831:
+    return 4
+  elif x >= 274.386831 and x < 545.4215509764397:
+    #print('Promotion to death zone and will continue to grow')
+    return 5
+  else:
+    #print('Promotion to death zone and growth has terminated')
+    return 6
