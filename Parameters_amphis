@@ -1,6 +1,6 @@
-# This files contains all constans and parameters required to run the model for estiamting Cprof for A. lobifera
+# This file contains all constants and parameters required to run the model for estimating C<sub>prod</sub> for _A. lobifera_
 
-## step 3 - Calculating parameters for A. lobifera
+## step 3 - Calculating parameters for _A. lobifera_
 ### Now, we will define some parameters and functions relevant to _T. agglutinans_, It is the data from mass-diameter relationships
 
 ### _sizemass_ : a function to calculate the weight of a foram test with maximum spiral diameter (micrometers) as the input 
@@ -8,7 +8,7 @@ def sizemass(size):
       weight = 0.0005 * (pow(size, 1.9552))      ### the input for size must be in micrometers
       return weight
 
-### _weight_sizeclass_ : a function to calculate the average weight of each foram test in a given size category representing their ontogenetic stages (refer to 2.2 of manuscript)
+### _weight_sizeclass_ : a function to calculate the average weight of each foram test in a given size category representing their ontogenetic stages (refer to 2.2 of the manuscript)
 def weight_sizeclass(upperlimit, lowerlimit):
       weight = [sizemass(upperlimit) + sizemass(lowerlimit)] /2            ### the input for size must be in micrometers
       return weight_sizeclass
@@ -30,3 +30,42 @@ df_param['Average weight'] = sizemass (df_param['midpoint size']) ### create new
 df_param['param'] = sizemass (df_param['Upper Limit']) # definitions of promotions
 
 print(df_param)
+
+### mass-diameter relationship (figure 2, Table 1)
+
+def param_calc(size, exponent,constant):
+     param = constant * (pow(size, exponent))
+      # Calculates the parameter t_i_ of a given size of _A. lobifera_
+     print(param)
+
+### Constants/parameters for Textularia derived from _df_param_ array
+
+param_a1 =  20.109088
+param_a2 =  115.686524
+param_a3 =  182.735376
+param_a4 =  307.156671
+param_a5 =  405.149474
+
+## step 5 - DEFINITIONS
+
+### _promotion_ : a definition to evaluate the size class of foraminifera in the next iteration. This is required to construct estimate Ti (m,n) from Xi (m,n) and also evauakte "corrected population structure" at time "i+1" it is required 
+
+### _A. lobifera_ reach the death zone when they attain the size of 2200 micrometers
+
+def promotion(x):
+  if x >= 0 and x < 94.2:
+    return 0
+  elif x >= 94.2 and x < 209.1:
+    return 1
+  elif x >=209.1 and x < 367:
+    return 2
+  elif x >= 367 and x < 813:
+    return 3
+  elif x >= 813 and x < 1423:
+    return 4
+  elif x >= 1423 and x < 2200:
+    #print('Promotion to death zone and will continue to grow')
+    return 5
+  else:
+    #print('Promotion to death zone and growth has terminated')
+    return 6
