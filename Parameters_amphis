@@ -1,2 +1,32 @@
 # This files contains all constans and parameters required to run the model for estiamting Cprof for A. lobifera
 
+## step 3 - Calculating parameters for A. lobifera
+### Now, we will define some parameters and functions relevant to _T. agglutinans_, It is the data from mass-diameter relationships
+
+### _sizemass_ : a function to calculate the weight of a foram test with maximum spiral diameter (micrometers) as the input 
+def sizemass(size):
+      weight = 0.0005 * (pow(size, 1.9552))      ### the input for size must be in micrometers
+      return weight
+
+### _weight_sizeclass_ : a function to calculate the average weight of each foram test in a given size category representing their ontogenetic stages (refer to 2.2 of manuscript)
+def weight_sizeclass(upperlimit, lowerlimit):
+      weight = [sizemass(upperlimit) + sizemass(lowerlimit)] /2            ### the input for size must be in micrometers
+      return weight_sizeclass
+
+### calculating the average and maximum (condition for promotion to the next stage) weights of foram text for each size category
+
+data = [['a1', 500, 250], ['a2', 750, 675], ['a3', 1000, 875], ['a4', 1500, 1250], ['a5', 2000, 1750]]      #### initialize list of lists
+
+df_param = pd.DataFrame(data, columns=['size class', 'Upper Limit', 'midpoint size'])      #### Create the pandas DataFrame
+
+print(df_param)      #### print dataframe.
+
+[paramrow, paramcol] = df_param.shape
+
+paramrow
+
+df_param['Average weight'] = sizemass (df_param['midpoint size']) ### create new columns with average weights of a size class
+
+df_param['param'] = sizemass (df_param['Upper Limit']) # definitions of promotions
+
+print(df_param)
