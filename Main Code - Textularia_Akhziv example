@@ -179,10 +179,10 @@ for i in range(rows):
   if i ==0:
     for j in range(cols):
       if df_counts.iloc[i,j] > 0:
-          calc_weight = weight(df_counts.iloc[i,j]*param_list[j],growth_rate,time[0],3308.6962816378864,df_counts.iloc[i,j])
+          calc_weight = weight(df_counts.iloc[i,j]*param_list[j],growth_rate,time[0],1161,df_counts.iloc[i,j])      ###adjust the constant for each species
           average_weight = calc_weight/df_counts.iloc[i,j]
           evolve_stage = promotion(average_weight)
-          prod_carb = carbprod(df_counts.iloc[i,j]*param_list[j],growth_rate,time[0],2200,df_counts.iloc[i,j])
+          prod_carb = carbprod(df_counts.iloc[i,j]*param_list[j],growth_rate,time[0],2500,df_counts.iloc[i,j])      ###adjust the constant for each species
           globals()["foram_mapping_" + str(i)].update({j:[df_counts.iloc[i,j], evolve_stage, average_weight, prod_carb]}) #dictionary format: dict = {foram_count, evolve_stage, average_weight_per_foram}
       else:
         globals()["foram_mapping_" + str(i)].update({j:[0, -1, 0, 0]})
