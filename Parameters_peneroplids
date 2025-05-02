@@ -35,7 +35,7 @@ print(df_param)
 
 def param_calc(size, exponent,constant):
      param = constant * (pow(size, exponent))
-      # Calculates the parameter t_i_ of a given size of _A. lobifera_
+      # Calculates the parameter t_i_ of a given size of _Peneroplis_
      print(param)
 
 ### Constants/parameters for _Peneroplis_ derived from _df_param_ array
